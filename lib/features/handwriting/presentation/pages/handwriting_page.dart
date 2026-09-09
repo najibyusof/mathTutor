@@ -5,9 +5,12 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/di/app_scope.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../../models/math_question.dart';
 import '../../../../models/question_input_method.dart';
-import '../../../../routes/app_router.dart';
 import '../../../../routes/app_routes.dart';
+import '../../../recognition/domain/entities/recognition_request.dart';
+import '../../../recognition/presentation/pages/recognition_review_screen.dart';
+import '../../domain/entities/handwriting_sample.dart';
 import '../../domain/repositories/handwriting_repository.dart';
 import '../controllers/handwriting_controller.dart';
 import '../widgets/handwriting_canvas.dart';
@@ -105,11 +108,21 @@ class _HandwritingPageState extends State<HandwritingPage> {
   }
 
   void _useExpression(String expression) {
+    final HandwritingController controller = _controller!;
+    final HandwritingSample? sample = controller.lastSample;
+
     Navigator.of(context).pushReplacementNamed(
-      AppRoutes.mathInput,
-      arguments: MathInputArgs(
-        method: QuestionInputMethod.write,
-        initialExpression: expression,
+      AppRoutes.review,
+      arguments: RecognitionReviewArgs(
+        question: MathQuestion.create(
+          originalInput:
+              '${controller.strokes.length} handwritten stroke'
+              '${controller.strokes.length == 1 ? '' : 's'}',
+          normalizedExpression: expression,
+          inputMethod: QuestionInputMethod.handwriting,
+          confidence: controller.result?.confidence ?? 0,
+        ),
+        source: sample == null ? null : HandwritingInput(sample),
       ),
     );
   }

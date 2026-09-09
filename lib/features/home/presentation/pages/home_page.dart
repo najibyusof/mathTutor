@@ -11,6 +11,7 @@ import '../../../../models/question_input_method.dart';
 import '../../../../models/user_profile.dart';
 import '../../../../routes/app_router.dart';
 import '../../../../routes/app_routes.dart';
+import '../../../recognition/presentation/pages/recognition_review_screen.dart';
 import '../widgets/ask_question_card.dart';
 import '../widgets/home_header.dart';
 import '../widgets/input_method_card.dart';
@@ -50,7 +51,7 @@ class HomePage extends StatelessWidget {
               StudyTipBanner(tip: MockData.tipOfTheDay(timestamp)),
               const SizedBox(height: AppSpacing.xl),
               AskQuestionCard(
-                onTap: () => _openInput(context, QuestionInputMethod.type),
+                onTap: () => _openInput(context, QuestionInputMethod.keyboard),
               ),
               const SizedBox(height: AppSpacing.xl),
               const SectionHeader(title: AppStrings.chooseInputMethod),
@@ -81,11 +82,8 @@ class HomePage extends StatelessWidget {
                     question: question,
                     now: timestamp,
                     onTap: () => Navigator.of(context).pushNamed(
-                      AppRoutes.solver,
-                      arguments: SolverArgs(
-                        expression: question.expression,
-                        source: question.inputMethod.name,
-                      ),
+                      AppRoutes.review,
+                      arguments: RecognitionReviewArgs(question: question),
                     ),
                   ),
               const SizedBox(height: AppSpacing.lg),

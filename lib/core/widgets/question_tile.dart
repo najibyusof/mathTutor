@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/math_input/domain/math_expression.dart';
 import '../../models/math_question.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
@@ -41,7 +42,8 @@ class QuestionTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  question.expression,
+                  MathExpression.parse(question.normalizedExpression)
+                      .displayText,
                   style: AppTypography.mathExpression.copyWith(
                     fontSize: 16,
                     color: theme.colorScheme.onSurface,
@@ -51,7 +53,7 @@ class QuestionTile extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
-                  '${question.topic} • '
+                  '${question.inputMethod.label} • '
                   '${DateFormatter.relative(question.createdAt, now: now)}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
@@ -62,13 +64,12 @@ class QuestionTile extends StatelessWidget {
               ],
             ),
           ),
-          if (question.answerPreview != null) ...<Widget>[
+          if (question.needsVerification) ...<Widget>[
             const SizedBox(width: AppSpacing.sm),
-            Text(
-              question.answerPreview!,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.primary,
-              ),
+            Icon(
+              Icons.warning_amber_outlined,
+              size: AppSizes.iconSm,
+              color: theme.colorScheme.error,
             ),
           ],
         ],

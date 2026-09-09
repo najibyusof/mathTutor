@@ -10,6 +10,7 @@ import '../features/home/presentation/pages/home_page.dart';
 import '../features/math_input/presentation/pages/math_input_page.dart';
 import '../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../features/profile/presentation/pages/profile_page.dart';
+import '../features/recognition/presentation/pages/recognition_review_screen.dart';
 import '../features/solver/presentation/pages/solver_page.dart';
 import '../features/splash/presentation/pages/splash_page.dart';
 import '../models/question_input_method.dart';
@@ -29,7 +30,7 @@ class SolverArgs {
 /// Arguments accepted by [AppRoutes.mathInput].
 class MathInputArgs {
   const MathInputArgs({
-    this.method = QuestionInputMethod.type,
+    this.method = QuestionInputMethod.keyboard,
     this.initialExpression,
   });
 
@@ -57,6 +58,12 @@ abstract final class AppRouter {
       AppRoutes.profile => _page(const ProfilePage(), settings),
       AppRoutes.mathInput => _page(
         MathInputPage(args: settings.arguments as MathInputArgs?),
+        settings,
+      ),
+      AppRoutes.review => _page(
+        RecognitionReviewScreen(
+          args: settings.arguments! as RecognitionReviewArgs,
+        ),
         settings,
       ),
       AppRoutes.solver => _page(

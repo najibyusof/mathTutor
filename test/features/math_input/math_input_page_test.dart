@@ -5,7 +5,7 @@ import 'package:mathtutor/core/theme/app_theme.dart';
 import 'package:mathtutor/features/math_input/presentation/pages/math_input_page.dart';
 import 'package:mathtutor/features/math_input/presentation/widgets/math_input_widget.dart';
 import 'package:mathtutor/features/math_input/presentation/widgets/math_keyboard_widget.dart';
-import 'package:mathtutor/features/solver/presentation/pages/solver_page.dart';
+import 'package:mathtutor/features/recognition/presentation/pages/recognition_review_screen.dart';
 import 'package:mathtutor/routes/app_router.dart';
 
 Future<void> _pumpPage(WidgetTester tester, {MathInputArgs? args}) async {
@@ -43,7 +43,7 @@ void main() {
     expect(solve.onPressed, isNull);
   });
 
-  testWidgets('typing enables solve and hands the expression over', (
+  testWidgets('typing enables solve and hands the expression to review', (
     WidgetTester tester,
   ) async {
     await _pumpPage(tester);
@@ -57,8 +57,8 @@ void main() {
     await tester.tap(find.text(AppStrings.solveQuestion));
     await tester.pumpAndSettle();
 
-    expect(find.byType(SolverPage), findsOneWidget);
-    expect(find.text('2+3'), findsOneWidget);
+    expect(find.byType(RecognitionReviewScreen), findsOneWidget);
+    expect(find.text('Confidence: High'), findsOneWidget);
   });
 
   testWidgets('opens with an existing expression for editing', (

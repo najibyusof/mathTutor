@@ -5,8 +5,8 @@ import '../../../../core/mock/mock_data.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../../models/math_question.dart';
-import '../../../../routes/app_router.dart';
 import '../../../../routes/app_routes.dart';
+import '../../../recognition/presentation/pages/recognition_review_screen.dart';
 
 /// List of previously asked questions. Backed by mock data in this phase.
 class HistoryPage extends StatelessWidget {
@@ -40,11 +40,8 @@ class HistoryPage extends StatelessWidget {
                       question: question,
                       now: timestamp,
                       onTap: () => Navigator.of(context).pushNamed(
-                        AppRoutes.solver,
-                        arguments: SolverArgs(
-                          expression: question.expression,
-                          source: question.inputMethod.name,
-                        ),
+                        AppRoutes.review,
+                        arguments: RecognitionReviewArgs(question: question),
                       ),
                     );
                   },

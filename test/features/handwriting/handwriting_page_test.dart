@@ -8,7 +8,7 @@ import 'package:mathtutor/models/recognition_result.dart';
 import 'package:mathtutor/features/handwriting/domain/repositories/handwriting_repository.dart';
 import 'package:mathtutor/features/handwriting/presentation/pages/handwriting_page.dart';
 import 'package:mathtutor/features/handwriting/presentation/widgets/handwriting_canvas.dart';
-import 'package:mathtutor/features/math_input/presentation/pages/math_input_page.dart';
+import 'package:mathtutor/features/recognition/presentation/pages/recognition_review_screen.dart';
 import 'package:mathtutor/routes/app_router.dart';
 
 class _FakeRepository implements HandwritingRepository {
@@ -165,7 +165,7 @@ void main() {
     expect(find.text('2*x+5=16'), findsOneWidget);
   });
 
-  testWidgets('accepting a reading opens the editor with the expression', (
+  testWidgets('accepting a reading opens the review screen', (
     WidgetTester tester,
   ) async {
     await _pumpPage(tester);
@@ -176,8 +176,9 @@ void main() {
     await tester.tap(find.text('Use this'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(MathInputPage), findsOneWidget);
-    expect(find.text('2 × x + 5 = 15'), findsOneWidget);
+    expect(find.byType(RecognitionReviewScreen), findsOneWidget);
+    expect(find.text('Confidence: High'), findsOneWidget);
+    expect(find.textContaining('handwritten stroke'), findsOneWidget);
   });
 
   testWidgets('rewrite dismisses the reading and keeps the strokes', (

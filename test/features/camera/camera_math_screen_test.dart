@@ -9,7 +9,7 @@ import 'package:mathtutor/features/camera/domain/entities/math_image.dart';
 import 'package:mathtutor/features/camera/domain/repositories/math_image_repository.dart';
 import 'package:mathtutor/features/camera/presentation/pages/camera_math_screen.dart';
 import 'package:mathtutor/features/camera/presentation/widgets/crop_overlay.dart';
-import 'package:mathtutor/features/math_input/presentation/pages/math_input_page.dart';
+import 'package:mathtutor/features/recognition/presentation/pages/recognition_review_screen.dart';
 import 'package:mathtutor/models/recognition_result.dart';
 import 'package:mathtutor/routes/app_router.dart';
 
@@ -141,7 +141,7 @@ void main() {
     expect(repository.received!.width, lessThan(800));
   });
 
-  testWidgets('confirming shows the reading and opens the editor', (
+  testWidgets('confirming shows the reading and opens review', (
     WidgetTester tester,
   ) async {
     await _pumpScreen(tester, cameraBytes: samplePng());
@@ -157,8 +157,8 @@ void main() {
     await tester.tap(find.text('Use this'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(MathInputPage), findsOneWidget);
-    expect(find.text('3 × x − 7 = 14'), findsOneWidget);
+    expect(find.byType(RecognitionReviewScreen), findsOneWidget);
+    expect(find.text('Confidence: High'), findsOneWidget);
   });
 
   testWidgets('a denied permission is explained in the UI', (

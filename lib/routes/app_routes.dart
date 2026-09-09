@@ -11,6 +11,7 @@ abstract final class AppRoutes {
   static const String mathInput = '/math-input';
   static const String handwriting = '/handwriting';
   static const String camera = '/camera';
+  static const String review = '/review';
   static const String solver = '/solver';
   static const String history = '/history';
   static const String profile = '/profile';

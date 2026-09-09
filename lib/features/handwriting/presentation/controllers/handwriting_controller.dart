@@ -37,6 +37,7 @@ class HandwritingController extends ChangeNotifier {
   HandwritingTool _tool = HandwritingTool.pen;
   bool _isRecognizing = false;
   RecognitionResult? _result;
+  HandwritingSample? _lastSample;
   String? _errorMessage;
 
   List<Stroke> get strokes => List<Stroke>.unmodifiable(_strokes);
@@ -47,6 +48,9 @@ class HandwritingController extends ChangeNotifier {
   bool get isRecognizing => _isRecognizing;
   RecognitionResult? get result => _result;
   String? get errorMessage => _errorMessage;
+
+  /// Sample sent to the engine, kept so recognition can be retried.
+  HandwritingSample? get lastSample => _lastSample;
 
   set tool(HandwritingTool value) {
     if (_tool == value) {
@@ -190,10 +194,14 @@ class HandwritingController extends ChangeNotifier {
     _result = null;
     notifyListeners();
 
+    final HandwritingSample sample = HandwritingSample.fromStrokes(
+      _strokes,
+      canvasSize,
+    );
+    _lastSample = sample;
+
     final Result<RecognitionResult> result = await _repository
-        .recognizeHandwriting(
-          HandwritingSample.fromStrokes(_strokes, canvasSize),
-        );
+        .recognizeHandwriting(sample);
 
     final bool succeeded = result.when<bool>(
       onSuccess: (RecognitionResult value) {

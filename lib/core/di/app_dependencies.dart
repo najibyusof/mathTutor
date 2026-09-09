@@ -13,6 +13,8 @@ import '../../features/handwriting/data/services/handwriting_recognition_service
 import '../../features/handwriting/data/services/mock_handwriting_recognition_service.dart';
 import '../../features/handwriting/data/services/remote_handwriting_recognition_service.dart';
 import '../../features/handwriting/domain/repositories/handwriting_repository.dart';
+import '../../features/recognition/data/services/question_recognition_service_impl.dart';
+import '../../features/recognition/domain/services/question_recognition_service.dart';
 import '../config/app_config.dart';
 import '../network/api_client.dart';
 import '../network/mock_api_client.dart';
@@ -28,6 +30,7 @@ class AppDependencies {
     required this.handwritingRepository,
     required this.mathImageRepository,
     required this.imageSourceService,
+    required this.recognitionService,
   });
 
   final TokenStorage tokenStorage;
@@ -37,6 +40,7 @@ class AppDependencies {
   final HandwritingRepository handwritingRepository;
   final MathImageRepository mathImageRepository;
   final ImageSourceService imageSourceService;
+  final QuestionRecognitionService recognitionService;
 
   /// Wires the graph for [config]; mock mode keeps the app usable without the
   /// Laravel backend. Overrides exist for tests.
@@ -85,14 +89,24 @@ class AppDependencies {
             ? const MockMathImageRecognitionService()
             : RemoteMathImageRecognitionService(client));
 
+    final HandwritingRepository handwritingRepository =
+        HandwritingRepositoryImpl(recognition);
+    final MathImageRepository imageRepository = MathImageRepositoryImpl(
+      imageEngine,
+    );
+
     return AppDependencies._(
       tokenStorage: storage,
       apiClient: client,
       authRepository: repository,
       authController: controller,
-      handwritingRepository: HandwritingRepositoryImpl(recognition),
-      mathImageRepository: MathImageRepositoryImpl(imageEngine),
+      handwritingRepository: handwritingRepository,
+      mathImageRepository: imageRepository,
       imageSourceService: imageSourceService ?? ImagePickerSourceService(),
+      recognitionService: QuestionRecognitionServiceImpl(
+        handwriting: handwritingRepository,
+        image: imageRepository,
+      ),
     );
   }
 }

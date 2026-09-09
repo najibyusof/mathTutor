@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../../models/math_question.dart';
 import '../../../../models/question_input_method.dart';
 import '../../../../routes/app_router.dart';
 import '../../../../routes/app_routes.dart';
+import '../../../recognition/domain/entities/recognition_request.dart';
+import '../../../recognition/presentation/pages/recognition_review_screen.dart';
 import '../../domain/math_expression.dart';
 import '../controllers/math_expression_controller.dart';
 import '../widgets/input_method_selector.dart';
@@ -29,7 +32,7 @@ class _MathInputPageState extends State<MathInputPage> {
       : MathExpressionController.fromRaw(widget.args!.initialExpression!);
 
   late QuestionInputMethod _method =
-      widget.args?.method ?? QuestionInputMethod.type;
+      widget.args?.method ?? QuestionInputMethod.keyboard;
 
   @override
   void dispose() {
@@ -44,21 +47,26 @@ class _MathInputPageState extends State<MathInputPage> {
     setState(() => _method = method);
 
     switch (method) {
-      case QuestionInputMethod.type:
+      case QuestionInputMethod.keyboard:
         break;
-      case QuestionInputMethod.write:
+      case QuestionInputMethod.handwriting:
         Navigator.of(context).pushNamed(AppRoutes.handwriting);
-      case QuestionInputMethod.scan:
+      case QuestionInputMethod.camera:
         Navigator.of(context).pushNamed(AppRoutes.camera);
     }
   }
 
-  void _solve(MathExpression expression) {
+  /// Typed questions go through the same review step as recognized ones.
+  void _review(MathExpression expression) {
     Navigator.of(context).pushNamed(
-      AppRoutes.solver,
-      arguments: SolverArgs(
-        expression: expression.rawInput,
-        source: _method.name,
+      AppRoutes.review,
+      arguments: RecognitionReviewArgs(
+        question: MathQuestion.create(
+          originalInput: expression.displayText,
+          normalizedExpression: expression.rawInput,
+          inputMethod: QuestionInputMethod.keyboard,
+        ),
+        source: KeyboardInput(expression.rawInput),
       ),
     );
   }
@@ -113,7 +121,7 @@ class _MathInputPageState extends State<MathInputPage> {
                   PrimaryButton(
                     label: AppStrings.solveQuestion,
                     icon: Icons.auto_awesome,
-                    onPressed: canSolve ? () => _solve(expression) : null,
+                    onPressed: canSolve ? () => _review(expression) : null,
                   ),
                   const SizedBox(height: AppSpacing.lg),
                 ],

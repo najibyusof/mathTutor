@@ -4,9 +4,11 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/di/app_scope.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../../models/math_question.dart';
 import '../../../../models/question_input_method.dart';
-import '../../../../routes/app_router.dart';
 import '../../../../routes/app_routes.dart';
+import '../../../recognition/domain/entities/recognition_request.dart';
+import '../../../recognition/presentation/pages/recognition_review_screen.dart';
 import '../../data/services/image_source_service.dart';
 import '../../domain/entities/image_crop.dart';
 import '../../domain/entities/math_image.dart';
@@ -47,11 +49,22 @@ class _CameraMathScreenState extends State<CameraMathScreen> {
   }
 
   void _useExpression(String expression) {
+    final CameraMathController controller = _controller!;
+    final MathImage? image = controller.preparedImage;
+
     Navigator.of(context).pushReplacementNamed(
-      AppRoutes.mathInput,
-      arguments: MathInputArgs(
-        method: QuestionInputMethod.scan,
-        initialExpression: expression,
+      AppRoutes.review,
+      arguments: RecognitionReviewArgs(
+        question: MathQuestion.create(
+          originalInput: image == null
+              ? 'Photo'
+              : 'Photo ${image.width}×${image.height} '
+                    '(${image.sizeKb.toStringAsFixed(0)} KB)',
+          normalizedExpression: expression,
+          inputMethod: QuestionInputMethod.camera,
+          confidence: controller.result?.confidence ?? 0,
+        ),
+        source: image == null ? null : PhotoInput(image),
       ),
     );
   }
