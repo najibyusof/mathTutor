@@ -1,0 +1,182 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:http/http.dart' as http;
+
+import '../config/app_config.dart';
+import '../errors/exceptions.dart';
+import '../storage/token_storage.dart';
+import '../utils/app_logger.dart';
+import 'api_endpoints.dart';
+
+/// Transport abstraction used by every repository.
+///
+/// Keeps features free of `package:http` and of token handling.
+abstract interface class ApiClient {
+  /// Sends a GET request and returns the decoded JSON object.
+  Future<Map<String, dynamic>> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    bool authenticated = true,
+  });
+
+  /// Sends a POST request with a JSON body and returns the decoded response.
+  Future<Map<String, dynamic>> post(
+    String path, {
+    Map<String, dynamic>? body,
+    bool authenticated = true,
+  });
+}
+
+/// `package:http` implementation that attaches the bearer token, applies the
+/// configured timeout and maps transport/HTTP errors onto [AppException]s.
+class HttpApiClient implements ApiClient {
+  HttpApiClient({
+    required TokenStorage tokenStorage,
+    http.Client? httpClient,
+    AppConfig? config,
+    this.onUnauthorized,
+  }) : _tokenStorage = tokenStorage,
+       _client = httpClient ?? http.Client(),
+       _config = config;
+
+  final TokenStorage _tokenStorage;
+  final http.Client _client;
+  final AppConfig? _config;
+
+  /// Invoked when the API rejects the stored token (expired or revoked).
+  final Future<void> Function()? onUnauthorized;
+
+  AppConfig get _activeConfig => _config ?? AppConfigScope.current;
+
+  @override
+  Future<Map<String, dynamic>> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    bool authenticated = true,
+  }) {
+    return _send(
+      'GET',
+      path,
+      queryParameters: queryParameters,
+      authenticated: authenticated,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> post(
+    String path, {
+    Map<String, dynamic>? body,
+    bool authenticated = true,
+  }) {
+    return _send('POST', path, body: body, authenticated: authenticated);
+  }
+
+  Future<Map<String, dynamic>> _send(
+    String method,
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? body,
+    required bool authenticated,
+  }) async {
+    final Uri uri = ApiEndpoints.url(path, queryParameters: queryParameters);
+    final Map<String, String> headers = await _headers(authenticated);
+
+    try {
+      final http.Response response = await switch (method) {
+        'POST' => _client.post(
+          uri,
+          headers: headers,
+          body: body == null ? null : jsonEncode(body),
+        ),
+        _ => _client.get(uri, headers: headers),
+      }.timeout(_activeConfig.apiTimeout);
+
+      return await _handleResponse(response);
+    } on SocketException {
+      throw const NetworkException(
+        'No internet connection. Check your network and try again.',
+      );
+    } on http.ClientException catch (error) {
+      throw NetworkException(error.message);
+    } on TimeoutException {
+      throw const NetworkException(
+        'The request took too long. Please try again.',
+      );
+    } on FormatException {
+      throw const ParsingException('The server returned an invalid response.');
+    }
+  }
+
+  Future<Map<String, String>> _headers(bool authenticated) async {
+    if (!authenticated) {
+      return ApiHeaders.json;
+    }
+    final String? token = await _tokenStorage.readToken();
+    return token == null ? ApiHeaders.json : ApiHeaders.bearer(token);
+  }
+
+  Future<Map<String, dynamic>> _handleResponse(http.Response response) async {
+    final Map<String, dynamic> json = _decode(response.body);
+    final int status = response.statusCode;
+
+    if (status >= 200 && status < 300) {
+      return json;
+    }
+
+    final String message = json['message'] as String? ?? '';
+    AppLogger.debug('API $status ${response.request?.url}: $message');
+
+    if (status == 401 || status == 403) {
+      await onUnauthorized?.call();
+      throw UnauthorizedException(
+        message.isEmpty ? 'Your session has expired. Please sign in again.' : message,
+        statusCode: status,
+      );
+    }
+    if (status == 422) {
+      throw ValidationException(
+        message.isEmpty ? 'Please check the highlighted fields.' : message,
+        statusCode: status,
+        fieldErrors: _fieldErrors(json['errors']),
+      );
+    }
+    if (status >= 500) {
+      throw ServerException(
+        message.isEmpty
+            ? 'The server is not responding. Please try again later.'
+            : message,
+        statusCode: status,
+      );
+    }
+    throw ServerException(
+      message.isEmpty ? 'Something went wrong.' : message,
+      statusCode: status,
+    );
+  }
+
+  Map<String, dynamic> _decode(String body) {
+    if (body.isEmpty) {
+      return <String, dynamic>{};
+    }
+    final Object? decoded = jsonDecode(body);
+    return decoded is Map<String, dynamic>
+        ? decoded
+        : <String, dynamic>{'data': decoded};
+  }
+
+  Map<String, List<String>> _fieldErrors(Object? raw) {
+    if (raw is! Map<String, dynamic>) {
+      return const <String, List<String>>{};
+    }
+    return raw.map(
+      (String field, dynamic messages) => MapEntry<String, List<String>>(
+        field,
+        messages is List
+            ? messages.map((Object? item) => '$item').toList(growable: false)
+            : <String>['$messages'],
+      ),
+    );
+  }
+}
