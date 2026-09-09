@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mathtutor/core/network/result.dart';
 import 'package:mathtutor/core/theme/app_theme.dart';
 import 'package:mathtutor/features/handwriting/domain/entities/handwriting_sample.dart';
-import 'package:mathtutor/features/handwriting/domain/entities/recognition_result.dart';
+import 'package:mathtutor/models/recognition_result.dart';
 import 'package:mathtutor/features/handwriting/domain/repositories/handwriting_repository.dart';
 import 'package:mathtutor/features/handwriting/presentation/pages/handwriting_page.dart';
 import 'package:mathtutor/features/handwriting/presentation/widgets/handwriting_canvas.dart';

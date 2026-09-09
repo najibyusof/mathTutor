@@ -44,3 +44,18 @@ class ParsingException extends AppException {
 class CacheException extends AppException {
   const CacheException(super.message);
 }
+
+/// The user refused (or the OS blocked) camera or photo access.
+class PermissionDeniedException extends AppException {
+  const PermissionDeniedException(super.message);
+}
+
+/// The requested hardware is missing or busy.
+class DeviceUnavailableException extends AppException {
+  const DeviceUnavailableException(super.message);
+}
+
+/// The selected file could not be decoded as an image.
+class InvalidImageException extends AppException {
+  const InvalidImageException(super.message);
+}

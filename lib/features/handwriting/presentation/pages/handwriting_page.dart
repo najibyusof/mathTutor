@@ -12,7 +12,6 @@ import '../../domain/repositories/handwriting_repository.dart';
 import '../controllers/handwriting_controller.dart';
 import '../widgets/handwriting_canvas.dart';
 import '../widgets/handwriting_toolbar.dart';
-import '../widgets/recognition_result_card.dart';
 import '../widgets/stroke_painter.dart';
 
 /// Write-a-question screen: a large canvas plus the tools around it.

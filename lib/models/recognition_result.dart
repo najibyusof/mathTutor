@@ -1,4 +1,7 @@
-/// What the recognition engine made of a handwriting sample.
+/// What a recognition engine (handwriting or image OCR) made of an input.
+///
+/// Shared by every input method so the recognized expression can be handed to
+/// the math editor for review before solving.
 class RecognitionResult {
   const RecognitionResult({
     required this.expression,

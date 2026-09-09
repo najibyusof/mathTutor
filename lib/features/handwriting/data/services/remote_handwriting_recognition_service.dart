@@ -1,7 +1,7 @@
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../domain/entities/handwriting_sample.dart';
-import '../../domain/entities/recognition_result.dart';
+import '../../../../models/recognition_result.dart';
 import 'handwriting_recognition_service.dart';
 
 /// Sends the normalized strokes to the Laravel API.

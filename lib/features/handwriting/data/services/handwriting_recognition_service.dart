@@ -1,5 +1,5 @@
 import '../../domain/entities/handwriting_sample.dart';
-import '../../domain/entities/recognition_result.dart';
+import '../../../../models/recognition_result.dart';
 
 /// Engine contract. Implementations throw `AppException`s; the repository
 /// converts them into failures.

@@ -13,6 +13,12 @@ String friendlyMessage(Failure failure) {
           (message.isEmpty ? 'Please check the highlighted fields.' : message),
     ServerFailure() => 'The server is not responding. Please try again later.',
     CacheFailure() => 'Could not read saved data on this device.',
+    PermissionFailure(:final String message) => message.isEmpty
+        ? 'Permission is needed to continue. You can enable it in Settings.'
+        : message,
+    DeviceUnavailableFailure(:final String message) => message.isEmpty
+        ? 'That is not available on this device.'
+        : message,
     UnexpectedFailure() => 'Something went wrong. Please try again.',
   };
 }

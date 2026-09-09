@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/widgets.dart';
-import '../../domain/entities/recognition_result.dart';
+import '../theme/app_spacing.dart';
+import '../theme/app_typography.dart';
+import 'widgets.dart';
+import '../../models/recognition_result.dart';
 
 /// Shows what the recognition engine read, with the option to accept an
 /// alternative reading.

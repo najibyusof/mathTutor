@@ -7,6 +7,7 @@ export 'loading_indicator.dart';
 export 'placeholder_page.dart';
 export 'primary_button.dart';
 export 'question_tile.dart';
+export 'recognition_result_card.dart';
 export 'responsive_content.dart';
 export 'secondary_button.dart';
 export 'section_header.dart';

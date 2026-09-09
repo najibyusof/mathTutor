@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../features/auth/presentation/pages/forgot_password_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/register_page.dart';
-import '../features/camera/presentation/pages/camera_page.dart';
+import '../features/camera/presentation/pages/camera_math_screen.dart';
 import '../features/handwriting/presentation/pages/handwriting_page.dart';
 import '../features/history/presentation/pages/history_page.dart';
 import '../features/home/presentation/pages/home_page.dart';
@@ -52,7 +52,7 @@ abstract final class AppRouter {
       AppRoutes.register => _page(const RegisterPage(), settings),
       AppRoutes.forgotPassword => _page(const ForgotPasswordPage(), settings),
       AppRoutes.handwriting => _page(const HandwritingPage(), settings),
-      AppRoutes.camera => _page(const CameraPage(), settings),
+      AppRoutes.camera => _page(const CameraMathScreen(), settings),
       AppRoutes.history => _page(const HistoryPage(), settings),
       AppRoutes.profile => _page(const ProfilePage(), settings),
       AppRoutes.mathInput => _page(

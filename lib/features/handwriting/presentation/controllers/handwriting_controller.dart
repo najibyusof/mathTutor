@@ -6,7 +6,7 @@ import '../../../../core/errors/failure_messages.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/network/result.dart';
 import '../../domain/entities/handwriting_sample.dart';
-import '../../domain/entities/recognition_result.dart';
+import '../../../../models/recognition_result.dart';
 import '../../domain/entities/stroke.dart';
 import '../../domain/repositories/handwriting_repository.dart';
 

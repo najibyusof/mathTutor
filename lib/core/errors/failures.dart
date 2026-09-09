@@ -40,6 +40,14 @@ class CacheFailure extends Failure {
   const CacheFailure(super.message, {super.code});
 }
 
+class PermissionFailure extends Failure {
+  const PermissionFailure(super.message, {super.code});
+}
+
+class DeviceUnavailableFailure extends Failure {
+  const DeviceUnavailableFailure(super.message, {super.code});
+}
+
 class UnexpectedFailure extends Failure {
   const UnexpectedFailure(super.message, {super.code});
 }
@@ -59,6 +67,11 @@ Failure mapExceptionToFailure(Object error) {
     ) =>
       ValidationFailure(message, code: statusCode, fieldErrors: fieldErrors),
     CacheException(:final String message) => CacheFailure(message),
+    PermissionDeniedException(:final String message) =>
+      PermissionFailure(message),
+    DeviceUnavailableException(:final String message) =>
+      DeviceUnavailableFailure(message),
+    InvalidImageException(:final String message) => ValidationFailure(message),
     ParsingException(:final String message) => UnexpectedFailure(message),
     _ => UnexpectedFailure(error.toString()),
   };

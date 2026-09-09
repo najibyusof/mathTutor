@@ -2,7 +2,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/network/result.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../domain/entities/handwriting_sample.dart';
-import '../../domain/entities/recognition_result.dart';
+import '../../../../models/recognition_result.dart';
 import '../../domain/repositories/handwriting_repository.dart';
 import '../services/handwriting_recognition_service.dart';
 

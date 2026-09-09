@@ -1,6 +1,6 @@
 import '../../../../core/errors/exceptions.dart';
 import '../../domain/entities/handwriting_sample.dart';
-import '../../domain/entities/recognition_result.dart';
+import '../../../../models/recognition_result.dart';
 import 'handwriting_recognition_service.dart';
 
 /// Returns sample expressions so the handwriting flow is testable before any

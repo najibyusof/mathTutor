@@ -8,7 +8,7 @@ import 'package:mathtutor/features/handwriting/data/repositories/handwriting_rep
 import 'package:mathtutor/features/handwriting/data/services/handwriting_recognition_service.dart';
 import 'package:mathtutor/features/handwriting/data/services/mock_handwriting_recognition_service.dart';
 import 'package:mathtutor/features/handwriting/domain/entities/handwriting_sample.dart';
-import 'package:mathtutor/features/handwriting/domain/entities/recognition_result.dart';
+import 'package:mathtutor/models/recognition_result.dart';
 import 'package:mathtutor/features/handwriting/domain/entities/stroke.dart';
 import 'package:mathtutor/features/handwriting/domain/repositories/handwriting_repository.dart';
 

@@ -2,6 +2,12 @@ import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
+import '../../features/camera/data/repositories/math_image_repository_impl.dart';
+import '../../features/camera/data/services/image_source_service.dart';
+import '../../features/camera/data/services/math_image_recognition_service.dart';
+import '../../features/camera/data/services/mock_math_image_recognition_service.dart';
+import '../../features/camera/data/services/remote_math_image_recognition_service.dart';
+import '../../features/camera/domain/repositories/math_image_repository.dart';
 import '../../features/handwriting/data/repositories/handwriting_repository_impl.dart';
 import '../../features/handwriting/data/services/handwriting_recognition_service.dart';
 import '../../features/handwriting/data/services/mock_handwriting_recognition_service.dart';
@@ -20,6 +26,8 @@ class AppDependencies {
     required this.authRepository,
     required this.authController,
     required this.handwritingRepository,
+    required this.mathImageRepository,
+    required this.imageSourceService,
   });
 
   final TokenStorage tokenStorage;
@@ -27,6 +35,8 @@ class AppDependencies {
   final AuthRepository authRepository;
   final AuthController authController;
   final HandwritingRepository handwritingRepository;
+  final MathImageRepository mathImageRepository;
+  final ImageSourceService imageSourceService;
 
   /// Wires the graph for [config]; mock mode keeps the app usable without the
   /// Laravel backend. Overrides exist for tests.
@@ -35,6 +45,8 @@ class AppDependencies {
     TokenStorage? tokenStorage,
     ApiClient? apiClient,
     HandwritingRecognitionService? handwritingRecognition,
+    MathImageRecognitionService? imageRecognition,
+    ImageSourceService? imageSourceService,
   }) {
     final AppConfig activeConfig = config ?? AppConfigScope.current;
     final TokenStorage storage =
@@ -67,12 +79,20 @@ class AppDependencies {
             ? const MockHandwritingRecognitionService()
             : RemoteHandwritingRecognitionService(client));
 
+    final MathImageRecognitionService imageEngine =
+        imageRecognition ??
+        (activeConfig.useMockApi
+            ? const MockMathImageRecognitionService()
+            : RemoteMathImageRecognitionService(client));
+
     return AppDependencies._(
       tokenStorage: storage,
       apiClient: client,
       authRepository: repository,
       authController: controller,
       handwritingRepository: HandwritingRepositoryImpl(recognition),
+      mathImageRepository: MathImageRepositoryImpl(imageEngine),
+      imageSourceService: imageSourceService ?? ImagePickerSourceService(),
     );
   }
 }
