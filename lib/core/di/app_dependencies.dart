@@ -2,6 +2,11 @@ import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
+import '../../features/handwriting/data/repositories/handwriting_repository_impl.dart';
+import '../../features/handwriting/data/services/handwriting_recognition_service.dart';
+import '../../features/handwriting/data/services/mock_handwriting_recognition_service.dart';
+import '../../features/handwriting/data/services/remote_handwriting_recognition_service.dart';
+import '../../features/handwriting/domain/repositories/handwriting_repository.dart';
 import '../config/app_config.dart';
 import '../network/api_client.dart';
 import '../network/mock_api_client.dart';
@@ -14,12 +19,14 @@ class AppDependencies {
     required this.apiClient,
     required this.authRepository,
     required this.authController,
+    required this.handwritingRepository,
   });
 
   final TokenStorage tokenStorage;
   final ApiClient apiClient;
   final AuthRepository authRepository;
   final AuthController authController;
+  final HandwritingRepository handwritingRepository;
 
   /// Wires the graph for [config]; mock mode keeps the app usable without the
   /// Laravel backend. Overrides exist for tests.
@@ -27,6 +34,7 @@ class AppDependencies {
     AppConfig? config,
     TokenStorage? tokenStorage,
     ApiClient? apiClient,
+    HandwritingRecognitionService? handwritingRecognition,
   }) {
     final AppConfig activeConfig = config ?? AppConfigScope.current;
     final TokenStorage storage =
@@ -53,11 +61,18 @@ class AppDependencies {
     );
     controller = AuthController(repository);
 
+    final HandwritingRecognitionService recognition =
+        handwritingRecognition ??
+        (activeConfig.useMockApi
+            ? const MockHandwritingRecognitionService()
+            : RemoteHandwritingRecognitionService(client));
+
     return AppDependencies._(
       tokenStorage: storage,
       apiClient: client,
       authRepository: repository,
       authController: controller,
+      handwritingRepository: HandwritingRepositoryImpl(recognition),
     );
   }
 }
