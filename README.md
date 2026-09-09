@@ -6,15 +6,15 @@ The backend is a Laravel REST API + MySQL (not part of this repository yet). The
 
 ## Status
 
-| Phase | Scope | State |
-| --- | --- | --- |
-| 1 | Project foundation: Material 3 theme, routing, core widgets, config | Done |
-| 2 | Main UI: splash, onboarding, home, question input | Done |
-| 3 | Authentication: login, register, forgot password, logout, secure token storage | Done |
-| 4 | Custom mathematical keyboard and expression editor | Done |
-| 5 | Handwriting input | Planned |
-| 6 | Camera / OCR input | Planned |
-| 7 | Solver and step-by-step explanations | Planned |
+| Phase | Scope                                                                          | State   |
+| ----- | ------------------------------------------------------------------------------ | ------- |
+| 1     | Project foundation: Material 3 theme, routing, core widgets, config            | Done    |
+| 2     | Main UI: splash, onboarding, home, question input                              | Done    |
+| 3     | Authentication: login, register, forgot password, logout, secure token storage | Done    |
+| 4     | Custom mathematical keyboard and expression editor                             | Done    |
+| 5     | Handwriting input                                                              | Planned |
+| 6     | Camera / OCR input                                                             | Planned |
+| 7     | Solver and step-by-step explanations                                           | Planned |
 
 The solver, handwriting recognition and camera capture are intentionally **not** implemented yet; those screens are placeholders. A mock API client keeps the app fully runnable without a backend.
 
@@ -82,13 +82,13 @@ Supported defines: `APP_ENV` (`development` | `staging` | `production`), `API_BA
 
 ## Expected API endpoints
 
-| Method | Path | Purpose |
-| --- | --- | --- |
-| POST | `/api/register` | Create account, returns bearer token + user |
-| POST | `/api/login` | Sign in, returns bearer token + user |
-| POST | `/api/forgot-password` | Send reset link |
-| POST | `/api/logout` | Revoke the current token |
-| GET | `/api/user` | Current user, used for the start-up session check |
+| Method | Path                   | Purpose                                           |
+| ------ | ---------------------- | ------------------------------------------------- |
+| POST   | `/api/register`        | Create account, returns bearer token + user       |
+| POST   | `/api/login`           | Sign in, returns bearer token + user              |
+| POST   | `/api/forgot-password` | Send reset link                                   |
+| POST   | `/api/logout`          | Revoke the current token                          |
+| GET    | `/api/user`            | Current user, used for the start-up session check |
 
 ## Quality checks
 
