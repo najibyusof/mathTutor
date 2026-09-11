@@ -71,8 +71,8 @@ void main() {
 
     await _fillLogin(
       tester,
-      email: MockApiClient.demoEmail,
-      password: 'not-the-password',
+      email: 'unknown@mathtutor.app',
+      password: 'local-test-password',
     );
     await tester.tap(find.widgetWithText(FilledButton, AppStrings.signIn));
     await tester.pumpAndSettle();
@@ -90,7 +90,7 @@ void main() {
     await _fillLogin(
       tester,
       email: MockApiClient.demoEmail,
-      password: MockApiClient.demoPassword,
+      password: 'local-test-password',
     );
     await tester.tap(find.widgetWithText(FilledButton, AppStrings.signIn));
     await tester.pumpAndSettle();

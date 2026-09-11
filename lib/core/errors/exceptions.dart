@@ -19,6 +19,11 @@ class ServerException extends AppException {
   const ServerException(super.message, {super.statusCode});
 }
 
+/// The API responded with 404: the resource or route does not exist.
+class NotFoundException extends AppException {
+  const NotFoundException(super.message, {super.statusCode});
+}
+
 /// The API responded with 401/403.
 class UnauthorizedException extends AppException {
   const UnauthorizedException(super.message, {super.statusCode});

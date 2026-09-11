@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mathtutor/core/config/app_config.dart';
+import 'package:mathtutor/core/di/app_dependencies.dart';
+import 'package:mathtutor/core/di/app_scope.dart';
 import 'package:mathtutor/core/errors/failures.dart';
 import 'package:mathtutor/core/network/result.dart';
 import 'package:mathtutor/core/theme/app_theme.dart';
@@ -8,7 +11,7 @@ import 'package:mathtutor/features/handwriting/domain/entities/stroke.dart';
 import 'package:mathtutor/features/recognition/domain/entities/recognition_request.dart';
 import 'package:mathtutor/features/recognition/domain/services/question_recognition_service.dart';
 import 'package:mathtutor/features/recognition/presentation/pages/recognition_review_screen.dart';
-import 'package:mathtutor/features/solver/presentation/pages/solver_page.dart';
+import 'package:mathtutor/features/solver/presentation/pages/solution_screen.dart';
 import 'package:mathtutor/models/math_question.dart';
 import 'package:mathtutor/models/question_input_method.dart';
 import 'package:mathtutor/routes/app_router.dart';
@@ -37,17 +40,14 @@ class _StubService implements QuestionRecognitionService {
 }
 
 HandwritingInput _handwritingSource() => HandwritingInput(
-  HandwritingSample.fromStrokes(
-    <Stroke>[
-      Stroke(
-        points: const <StrokePoint>[
-          StrokePoint(Offset(0, 0)),
-          StrokePoint(Offset(9, 9)),
-        ],
-      ),
-    ],
-    const Size(100, 100),
-  ),
+  HandwritingSample.fromStrokes(<Stroke>[
+    Stroke(
+      points: const <StrokePoint>[
+        StrokePoint(Offset(0, 0)),
+        StrokePoint(Offset(9, 9)),
+      ],
+    ),
+  ], const Size(100, 100)),
 );
 
 MathQuestion _question({
@@ -77,14 +77,25 @@ Future<_StubService> _pumpReview(
 
   final _StubService service = _StubService(failure: failure);
   await tester.pumpWidget(
-    MaterialApp(
-      theme: brightness == Brightness.light ? AppTheme.light : AppTheme.dark,
-      onGenerateRoute: AppRouter.onGenerateRoute,
-      home: RecognitionReviewScreen(
-        service: service,
-        args: RecognitionReviewArgs(
-          question: question ?? _question(),
-          source: source,
+    AppScope(
+      dependencies: AppDependencies.create(
+        config: const AppConfig(
+          environment: AppEnvironment.development,
+          apiBaseUrl: 'http://10.0.2.2:8000/api/v1',
+          apiTimeout: Duration(seconds: 10),
+          enableLogging: true,
+          useMockApi: true,
+        ),
+      ),
+      child: MaterialApp(
+        theme: brightness == Brightness.light ? AppTheme.light : AppTheme.dark,
+        onGenerateRoute: AppRouter.onGenerateRoute,
+        home: RecognitionReviewScreen(
+          service: service,
+          args: RecognitionReviewArgs(
+            question: question ?? _question(),
+            source: source,
+          ),
         ),
       ),
     ),
@@ -211,7 +222,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Recognition failed'), findsOneWidget);
-    expect(find.textContaining('No internet connection'), findsOneWidget);
+    expect(
+      find.textContaining('Unable to connect to the server'),
+      findsOneWidget,
+    );
     expect(find.text('Confidence: Medium'), findsNothing);
     expect(find.text('50%'), findsOneWidget);
   });
@@ -224,7 +238,7 @@ void main() {
     await tester.tap(find.text('Solve'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(SolverPage), findsOneWidget);
-    expect(find.text('2*x+5=15'), findsOneWidget);
+    expect(find.byType(SolutionScreen), findsOneWidget);
+    expect(find.text('x = 5'), findsNWidgets(2));
   });
 }

@@ -95,10 +95,11 @@ class AuthController extends ChangeNotifier {
   }
 
   /// Drops the session locally after the API rejected the stored token.
-  void handleExpiredSession() {
+  Future<void> handleExpiredSession() async {
     if (_status == AuthStatus.unauthenticated) {
       return;
     }
+    await _repository.clearStoredSession();
     _user = null;
     _status = AuthStatus.unauthenticated;
     _errorMessage = 'Your session has expired. Please sign in again.';

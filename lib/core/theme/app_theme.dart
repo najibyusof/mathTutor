@@ -27,12 +27,28 @@ abstract final class AppTheme {
       textTheme: textTheme,
       visualDensity: VisualDensity.adaptivePlatformDensity,
       splashFactory: InkSparkle.splashFactory,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: <TargetPlatform, PageTransitionsBuilder>{
+          TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
       appBarTheme: AppBarTheme(
         centerTitle: false,
         scrolledUnderElevation: 2,
         backgroundColor: scheme.surface,
         foregroundColor: scheme.onSurface,
         titleTextStyle: textTheme.titleLarge,
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          minimumSize: const Size(AppSizes.buttonHeight, AppSizes.buttonHeight),
+          tapTargetSize: MaterialTapTargetSize.padded,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+          ),
+        ),
       ),
       cardTheme: CardThemeData(
         clipBehavior: Clip.antiAlias,
@@ -69,11 +85,19 @@ abstract final class AppTheme {
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(textStyle: textTheme.labelLarge),
+        style: TextButton.styleFrom(
+          minimumSize: const Size(
+            AppSizes.buttonMinWidth,
+            AppSizes.buttonHeight,
+          ),
+          tapTargetSize: MaterialTapTargetSize.padded,
+          textStyle: textTheme.labelLarge,
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: scheme.surfaceContainerHighest,
+        constraints: const BoxConstraints(minHeight: AppSizes.buttonHeight),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.md,
@@ -126,6 +150,8 @@ abstract final class AppTheme {
         ),
       ),
       listTileTheme: ListTileThemeData(
+        minVerticalPadding: AppSpacing.sm,
+        minLeadingWidth: AppSizes.iconLg,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),

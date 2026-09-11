@@ -34,10 +34,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
       _finish();
       return;
     }
-    _controller.nextPage(
-      duration: AppConstants.mediumAnimation,
-      curve: Curves.easeOut,
-    );
+    final Duration duration = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : AppConstants.mediumAnimation;
+    _controller.nextPage(duration: duration, curve: Curves.easeOut);
   }
 
   void _finish() {
@@ -68,10 +68,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              PageDots(
-                count: OnboardingStep.steps.length,
-                activeIndex: _index,
-              ),
+              PageDots(count: OnboardingStep.steps.length, activeIndex: _index),
               const SizedBox(height: AppSpacing.xl),
               PrimaryButton(
                 label: _isLastStep

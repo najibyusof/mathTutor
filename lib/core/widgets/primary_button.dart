@@ -39,8 +39,12 @@ class PrimaryButton extends StatelessWidget {
           )
         : FilledButton(onPressed: enabled ? onPressed : null, child: child);
 
-    return isExpanded
-        ? SizedBox(width: double.infinity, child: button)
+    final Widget accessibleButton = isLoading
+        ? Semantics(label: '$label, loading', button: true, child: button)
         : button;
+
+    return isExpanded
+        ? SizedBox(width: double.infinity, child: accessibleButton)
+        : accessibleButton;
   }
 }

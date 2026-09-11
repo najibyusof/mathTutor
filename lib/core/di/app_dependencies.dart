@@ -2,6 +2,10 @@ import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
+import '../../features/ai_explanation/data/providers/mock_ai_explanation_provider.dart';
+import '../../features/ai_explanation/data/providers/remote_ai_explanation_provider.dart';
+import '../../features/ai_explanation/data/services/ai_explanation_service_impl.dart';
+import '../../features/ai_explanation/domain/services/ai_explanation_service.dart';
 import '../../features/camera/data/repositories/math_image_repository_impl.dart';
 import '../../features/camera/data/services/image_source_service.dart';
 import '../../features/camera/data/services/math_image_recognition_service.dart';
@@ -13,6 +17,10 @@ import '../../features/handwriting/data/services/handwriting_recognition_service
 import '../../features/handwriting/data/services/mock_handwriting_recognition_service.dart';
 import '../../features/handwriting/data/services/remote_handwriting_recognition_service.dart';
 import '../../features/handwriting/domain/repositories/handwriting_repository.dart';
+import '../../features/math/data/datasources/math_remote_data_source.dart';
+import '../../features/math/data/repositories/math_repository_impl.dart';
+import '../../features/math/domain/repositories/math_repository.dart';
+import '../../features/math/presentation/controllers/math_api_controller.dart';
 import '../../features/recognition/data/services/question_recognition_service_impl.dart';
 import '../../features/recognition/domain/services/question_recognition_service.dart';
 import '../config/app_config.dart';
@@ -31,6 +39,9 @@ class AppDependencies {
     required this.mathImageRepository,
     required this.imageSourceService,
     required this.recognitionService,
+    required this.aiExplanationService,
+    required this.mathRepository,
+    required this.mathController,
   });
 
   final TokenStorage tokenStorage;
@@ -41,6 +52,9 @@ class AppDependencies {
   final MathImageRepository mathImageRepository;
   final ImageSourceService imageSourceService;
   final QuestionRecognitionService recognitionService;
+  final AIExplanationService aiExplanationService;
+  final MathRepository mathRepository;
+  final MathApiController mathController;
 
   /// Wires the graph for [config]; mock mode keeps the app usable without the
   /// Laravel backend. Overrides exist for tests.
@@ -94,6 +108,9 @@ class AppDependencies {
     final MathImageRepository imageRepository = MathImageRepositoryImpl(
       imageEngine,
     );
+    final MathRepository mathRepository = MathRepositoryImpl(
+      MathRemoteDataSource(client),
+    );
 
     return AppDependencies._(
       tokenStorage: storage,
@@ -107,6 +124,13 @@ class AppDependencies {
         handwriting: handwritingRepository,
         image: imageRepository,
       ),
+      aiExplanationService: AIExplanationServiceImpl(
+        activeConfig.useMockApi
+            ? const MockAIExplanationProvider()
+            : RemoteAIExplanationProvider(client),
+      ),
+      mathRepository: mathRepository,
+      mathController: MathApiController(mathRepository),
     );
   }
 }

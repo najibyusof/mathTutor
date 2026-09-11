@@ -27,6 +27,9 @@ abstract interface class AuthRepository {
   /// Revokes the token server-side and always clears it locally.
   Future<Result<void>> logout();
 
+  /// Clears local credentials without making another network request.
+  Future<void> clearStoredSession();
+
   /// Restores the session at start-up using the stored token.
   Future<Result<AuthUser>> currentUser();
 }

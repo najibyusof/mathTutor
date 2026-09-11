@@ -111,4 +111,15 @@ void main() {
     expect(controller.value.displayText, 'y = 2');
     expect(controller.canUndo, isFalse);
   });
+
+  test('rejects keyboard input beyond the expression length limit', () {
+    final MathExpressionController controller = MathExpressionController();
+    addTearDown(controller.dispose);
+
+    for (int index = 0; index < 600; index++) {
+      controller.handleKey(_key(MathToken.digit('1')));
+    }
+
+    expect(controller.value.tokens.length, lessThanOrEqualTo(512));
+  });
 }

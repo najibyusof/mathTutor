@@ -65,15 +65,15 @@ class _SplashPageState extends State<SplashPage>
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final bool reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: Center(
         child: FadeTransition(
-          opacity: CurvedAnimation(
-            parent: _controller,
-            curve: Curves.easeOut,
-          ),
+          opacity: reduceMotion
+              ? const AlwaysStoppedAnimation<double>(1)
+              : CurvedAnimation(parent: _controller, curve: Curves.easeOut),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[

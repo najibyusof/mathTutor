@@ -15,7 +15,7 @@ enum AppEnvironment {
 ///
 /// ```
 /// flutter run --dart-define=APP_ENV=production \
-///             --dart-define=API_BASE_URL=https://api.mathtutor.app
+///             --dart-define=API_BASE_URL=https://MathTutor.padat.net/api/v1
 /// ```
 class AppConfig {
   const AppConfig({
@@ -64,9 +64,9 @@ class AppConfig {
   static const Map<AppEnvironment, String> defaultApiBaseUrls =
       <AppEnvironment, String>{
         // 10.0.2.2 is the host machine as seen from the Android emulator.
-        AppEnvironment.development: 'http://10.0.2.2:8000/api',
-        AppEnvironment.staging: 'https://staging.mathtutor.app/api',
-        AppEnvironment.production: 'https://api.mathtutor.app/api',
+        AppEnvironment.development: 'http://10.0.2.2:8000/api/v1',
+        AppEnvironment.staging: 'https://MathTutor.padat.net/api/v1',
+        AppEnvironment.production: 'https://MathTutor.padat.net/api/v1',
       };
 
   /// Builds the configuration for the current build using compile-time
@@ -77,14 +77,20 @@ class AppConfig {
         ? _apiBaseUrlOverride
         : defaultApiBaseUrls[environment]!;
 
-    return AppConfig(
+    final AppConfig config = AppConfig(
       environment: environment,
       apiBaseUrl: _stripTrailingSlash(baseUrl),
       apiTimeout: const Duration(seconds: _apiTimeoutSeconds),
       enableLogging: !environment.isProduction,
       useMockApi: _useMockApi && !environment.isProduction,
     );
+    if (config.environment.isProduction && !config.usesHttps) {
+      throw StateError('Production API_BASE_URL must use HTTPS.');
+    }
+    return config;
   }
+
+  bool get usesHttps => Uri.tryParse(apiBaseUrl)?.scheme == 'https';
 
   static AppEnvironment _parseEnvironment(String value) {
     return AppEnvironment.values.firstWhere(

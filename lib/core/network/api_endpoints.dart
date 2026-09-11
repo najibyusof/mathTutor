@@ -8,16 +8,27 @@ abstract final class ApiEndpoints {
   const ApiEndpoints._();
 
   // Auth
-  static const String register = '/register';
-  static const String login = '/login';
-  static const String forgotPassword = '/forgot-password';
-  static const String logout = '/logout';
-  static const String user = '/user';
+  static const String register = '/auth/register';
+  static const String login = '/auth/login';
+  static const String forgotPassword = '/auth/forgot-password';
+  static const String logout = '/auth/logout';
+  static const String user = '/auth/user';
 
-  // Solver
-  static const String solveExpression = '/solve/expression';
-  static const String solveHandwriting = '/solve/handwriting';
-  static const String solveImage = '/solve/image';
+  // Questions
+  static const String questions = '/questions';
+  static String questionItem(String id) => '/questions/$id';
+  static String questionSolve(String id) => '/questions/$id/solve';
+  static String questionSolution(String id) => '/questions/$id/solution';
+
+  // Recognition (async: submit then poll)
+  static const String recognitionImage = '/recognition/image';
+  static const String recognitionHandwriting = '/recognition/handwriting';
+  static String recognitionItem(String id) => '/recognition/$id';
+
+  // Solutions (AI explanations attach to an already-solved question)
+  static String solutionVerify(String id) => '/solutions/$id/verify';
+  static String solutionExplanation(String id) => '/solutions/$id/explanation';
+  static String solutionHint(String id) => '/solutions/$id/hint';
 
   // History
   static const String history = '/history';
@@ -34,8 +45,7 @@ abstract final class ApiEndpoints {
     }
     return base.replace(
       queryParameters: queryParameters.map(
-        (String key, dynamic value) =>
-            MapEntry<String, String>(key, '$value'),
+        (String key, dynamic value) => MapEntry<String, String>(key, '$value'),
       ),
     );
   }

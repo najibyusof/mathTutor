@@ -56,8 +56,11 @@ class AuthRemoteDataSource {
 
   Future<AuthUserModel> currentUser() async {
     final Map<String, dynamic> json = await _client.get(ApiEndpoints.user);
-    final Map<String, dynamic> user =
+    final Map<String, dynamic> data =
         json['data'] as Map<String, dynamic>? ?? json;
+    // The real API wraps the user one level deeper: data.user, not data.
+    final Map<String, dynamic> user =
+        data['user'] as Map<String, dynamic>? ?? data;
     return AuthUserModel.fromJson(user);
   }
 }

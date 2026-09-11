@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/constants/app_constants.dart';
 import '../../domain/math_expression.dart';
 import '../../domain/math_keys.dart';
 
@@ -21,6 +22,10 @@ class MathExpressionController extends ValueNotifier<MathExpression> {
   void handleKey(MathKey key) {
     switch (key.action) {
       case MathKeyAction.insert:
+        if (value.tokens.length + key.tokens.length >
+            AppConstants.maxExpressionLength) {
+          return;
+        }
         _apply(value.insert(key.tokens, cursorOffset: key.cursorOffset));
       case MathKeyAction.backspace:
         _apply(value.backspace());

@@ -27,6 +27,25 @@ abstract interface class ApiClient {
     Map<String, dynamic>? body,
     bool authenticated = true,
   });
+
+  /// Sends an authenticated DELETE request.
+  Future<Map<String, dynamic>> delete(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    bool authenticated = true,
+  });
+
+  /// Uploads a single file as `multipart/form-data` and returns the decoded
+  /// JSON response. Used by endpoints that accept an image (e.g. recognition
+  /// submission), which the Laravel API does not accept as a JSON body.
+  Future<Map<String, dynamic>> postMultipart(
+    String path, {
+    required String fieldName,
+    required List<int> bytes,
+    required String filename,
+    Map<String, String>? fields,
+    bool authenticated = true,
+  });
 }
 
 /// `package:http` implementation that attaches the bearer token, applies the
@@ -73,14 +92,76 @@ class HttpApiClient implements ApiClient {
     return _send('POST', path, body: body, authenticated: authenticated);
   }
 
+  @override
+  Future<Map<String, dynamic>> delete(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    bool authenticated = true,
+  }) => _send(
+    'DELETE',
+    path,
+    queryParameters: queryParameters,
+    authenticated: authenticated,
+  );
+
+  @override
+  Future<Map<String, dynamic>> postMultipart(
+    String path, {
+    required String fieldName,
+    required List<int> bytes,
+    required String filename,
+    Map<String, String>? fields,
+    bool authenticated = true,
+  }) async {
+    final Uri uri = ApiEndpoints.url(path);
+    if (_activeConfig.environment.isProduction && uri.scheme != 'https') {
+      throw StateError('Production API requests require HTTPS.');
+    }
+    final Map<String, String> headers = Map<String, String>.of(
+      await _headers(authenticated),
+    );
+    headers.remove(ApiHeaders.contentType);
+
+    final http.MultipartRequest request = http.MultipartRequest('POST', uri)
+      ..headers.addAll(headers)
+      ..fields.addAll(fields ?? const <String, String>{})
+      ..files.add(
+        http.MultipartFile.fromBytes(fieldName, bytes, filename: filename),
+      );
+
+    try {
+      final http.StreamedResponse streamed = await _client
+          .send(request)
+          .timeout(_activeConfig.apiTimeout);
+      final http.Response response = await http.Response.fromStream(streamed);
+      return await _handleResponse(response);
+    } on SocketException {
+      throw const NetworkException(
+        'No internet connection. Check your network and try again.',
+      );
+    } on http.ClientException catch (error) {
+      throw NetworkException(error.message);
+    } on TimeoutException {
+      throw const NetworkException(
+        'The request took too long. Please try again.',
+      );
+    } on FormatException {
+      throw const ParsingException('The server returned an invalid response.');
+    }
+  }
+
   Future<Map<String, dynamic>> _send(
     String method,
     String path, {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? body,
     required bool authenticated,
+    bool allowRetry = true,
   }) async {
     final Uri uri = ApiEndpoints.url(path, queryParameters: queryParameters);
+    if (_activeConfig.environment.isProduction && uri.scheme != 'https') {
+      throw StateError('Production API requests require HTTPS.');
+    }
     final Map<String, String> headers = await _headers(authenticated);
 
     try {
@@ -90,17 +171,38 @@ class HttpApiClient implements ApiClient {
           headers: headers,
           body: body == null ? null : jsonEncode(body),
         ),
+        'DELETE' => _client.delete(uri, headers: headers),
         _ => _client.get(uri, headers: headers),
       }.timeout(_activeConfig.apiTimeout);
 
       return await _handleResponse(response);
     } on SocketException {
+      if (method == 'GET' && allowRetry) {
+        return _send(
+          method,
+          path,
+          queryParameters: queryParameters,
+          body: body,
+          authenticated: authenticated,
+          allowRetry: false,
+        );
+      }
       throw const NetworkException(
         'No internet connection. Check your network and try again.',
       );
     } on http.ClientException catch (error) {
       throw NetworkException(error.message);
     } on TimeoutException {
+      if (method == 'GET' && allowRetry) {
+        return _send(
+          method,
+          path,
+          queryParameters: queryParameters,
+          body: body,
+          authenticated: authenticated,
+          allowRetry: false,
+        );
+      }
       throw const NetworkException(
         'The request took too long. Please try again.',
       );
@@ -126,12 +228,16 @@ class HttpApiClient implements ApiClient {
     }
 
     final String message = json['message'] as String? ?? '';
-    AppLogger.debug('API $status ${response.request?.url}: $message');
+    AppLogger.debug(
+      'API response status=$status method=${response.request?.method ?? 'unknown'}',
+    );
 
     if (status == 401 || status == 403) {
       await onUnauthorized?.call();
       throw UnauthorizedException(
-        message.isEmpty ? 'Your session has expired. Please sign in again.' : message,
+        message.isEmpty
+            ? 'Your session has expired. Please sign in again.'
+            : message,
         statusCode: status,
       );
     }
@@ -140,6 +246,12 @@ class HttpApiClient implements ApiClient {
         message.isEmpty ? 'Please check the highlighted fields.' : message,
         statusCode: status,
         fieldErrors: _fieldErrors(json['errors']),
+      );
+    }
+    if (status == 404) {
+      throw NotFoundException(
+        message.isEmpty ? 'The requested resource was not found.' : message,
+        statusCode: status,
       );
     }
     if (status >= 500) {

@@ -6,6 +6,7 @@ import '../../../../core/widgets/widgets.dart';
 import '../../../../models/math_question.dart';
 import '../../../../routes/app_router.dart';
 import '../../../../routes/app_routes.dart';
+import '../../../math/presentation/controllers/math_api_controller.dart';
 import '../../../math_input/domain/math_expression.dart';
 import '../../../math_input/presentation/widgets/math_input_widget.dart';
 import '../../domain/entities/recognition_request.dart';
@@ -27,11 +28,7 @@ class RecognitionReviewArgs {
 /// Last stop before solving: shows the recognized question, how sure the
 /// engine is, and lets the student edit or re-run recognition.
 class RecognitionReviewScreen extends StatefulWidget {
-  const RecognitionReviewScreen({
-    required this.args,
-    this.service,
-    super.key,
-  });
+  const RecognitionReviewScreen({required this.args, this.service, super.key});
 
   final RecognitionReviewArgs args;
 
@@ -45,6 +42,7 @@ class RecognitionReviewScreen extends StatefulWidget {
 
 class _RecognitionReviewScreenState extends State<RecognitionReviewScreen> {
   RecognitionReviewController? _controller;
+  MathApiController? _mathController;
 
   @override
   void didChangeDependencies() {
@@ -54,6 +52,7 @@ class _RecognitionReviewScreenState extends State<RecognitionReviewScreen> {
       source: widget.args.source,
       service: widget.service ?? AppScope.maybeOf(context)?.recognitionService,
     );
+    _mathController ??= AppScope.maybeOf(context)?.mathController;
   }
 
   @override
@@ -62,14 +61,32 @@ class _RecognitionReviewScreenState extends State<RecognitionReviewScreen> {
     super.dispose();
   }
 
-  void _solve(MathQuestion question) {
-    Navigator.of(context).pushNamed(
-      AppRoutes.solver,
-      arguments: SolverArgs(
-        expression: question.normalizedExpression,
-        source: question.inputMethod.name,
-      ),
-    );
+  Future<void> _solve(MathQuestion question) async {
+    final MathApiController? mathController = _mathController;
+    if (mathController == null) {
+      return;
+    }
+    final bool solved = await mathController.solve(question);
+    if (!mounted) {
+      return;
+    }
+    if (solved && mathController.solution != null) {
+      Navigator.of(context).pushNamed(
+        AppRoutes.solver,
+        arguments: SolverArgs(
+          expression: question.normalizedExpression,
+          source: question.inputMethod.name,
+          solution: mathController.solution,
+        ),
+      );
+      return;
+    }
+    final String message =
+        mathController.errorMessage ??
+        'We could not solve this question. Please try again.';
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -81,7 +98,10 @@ class _RecognitionReviewScreenState extends State<RecognitionReviewScreen> {
       body: SafeArea(
         child: ResponsiveContent(
           child: AnimatedBuilder(
-            animation: controller,
+            animation: Listenable.merge(<Listenable>[
+              controller,
+              ?_mathController,
+            ]),
             builder: (BuildContext context, _) {
               final MathQuestion question = controller.question;
 
@@ -164,7 +184,10 @@ class _RecognitionReviewScreenState extends State<RecognitionReviewScreen> {
                   PrimaryButton(
                     label: 'Solve',
                     icon: Icons.auto_awesome,
-                    onPressed: question.normalizedExpression.isEmpty
+                    isLoading: _mathController?.isLoading ?? false,
+                    onPressed:
+                        question.normalizedExpression.isEmpty ||
+                            (_mathController?.isLoading ?? false)
                         ? null
                         : () => _solve(question),
                   ),

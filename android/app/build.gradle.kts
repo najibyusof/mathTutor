@@ -1,3 +1,11 @@
+import java.util.Properties
+
+val signingPropertiesFile = rootProject.file("key.properties")
+val signingProperties = Properties()
+if (signingPropertiesFile.exists()) {
+    signingPropertiesFile.inputStream().use(signingProperties::load)
+}
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -7,7 +15,7 @@ plugins {
 
 android {
     namespace = "com.mathtutor.mathtutor"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -30,11 +38,20 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            keyAlias = signingProperties["keyAlias"] as String?
+            keyPassword = signingProperties["keyPassword"] as String?
+            storePassword = signingProperties["storePassword"] as String?
+            (signingProperties["storeFile"] as String?)?.let { path ->
+                storeFile = file(path)
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }

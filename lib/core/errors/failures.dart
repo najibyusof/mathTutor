@@ -22,6 +22,10 @@ class ServerFailure extends Failure {
   const ServerFailure(super.message, {super.code});
 }
 
+class NotFoundFailure extends Failure {
+  const NotFoundFailure(super.message, {super.code});
+}
+
 class UnauthorizedFailure extends Failure {
   const UnauthorizedFailure(super.message, {super.code});
 }
@@ -52,12 +56,34 @@ class UnexpectedFailure extends Failure {
   const UnexpectedFailure(super.message, {super.code});
 }
 
+class MathParserFailure extends Failure {
+  const MathParserFailure(super.message, {super.code});
+}
+
+class MathSolverFailure extends Failure {
+  const MathSolverFailure(super.message, {super.code});
+}
+
+class SolutionValidationFailure extends Failure {
+  const SolutionValidationFailure(super.message, {super.code});
+}
+
+class AIExplanationFailure extends Failure {
+  const AIExplanationFailure(super.message, {super.code});
+}
+
+class AIResponseFailure extends Failure {
+  const AIResponseFailure(super.message, {super.code});
+}
+
 /// Maps a data-layer [AppException] onto its domain [Failure].
 Failure mapExceptionToFailure(Object error) {
   return switch (error) {
     NetworkException(:final String message) => NetworkFailure(message),
     ServerException(:final String message, :final int? statusCode) =>
       ServerFailure(message, code: statusCode),
+    NotFoundException(:final String message, :final int? statusCode) =>
+      NotFoundFailure(message, code: statusCode),
     UnauthorizedException(:final String message, :final int? statusCode) =>
       UnauthorizedFailure(message, code: statusCode),
     ValidationException(
@@ -67,8 +93,9 @@ Failure mapExceptionToFailure(Object error) {
     ) =>
       ValidationFailure(message, code: statusCode, fieldErrors: fieldErrors),
     CacheException(:final String message) => CacheFailure(message),
-    PermissionDeniedException(:final String message) =>
-      PermissionFailure(message),
+    PermissionDeniedException(:final String message) => PermissionFailure(
+      message,
+    ),
     DeviceUnavailableException(:final String message) =>
       DeviceUnavailableFailure(message),
     InvalidImageException(:final String message) => ValidationFailure(message),

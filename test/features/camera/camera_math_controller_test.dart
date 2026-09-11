@@ -67,9 +67,7 @@ class FakeImageRepository implements MathImageRepository {
   Future<Result<RecognitionResult>> recognizeMathImage(MathImage image) async {
     received = image;
     if (failure != null) {
-      return Result<RecognitionResult>.failure(
-        mapExceptionToFailure(failure!),
-      );
+      return Result<RecognitionResult>.failure(mapExceptionToFailure(failure!));
     }
     return Result<RecognitionResult>.success(
       result ?? const RecognitionResult(expression: '3*x-7=14'),
@@ -225,7 +223,10 @@ void main() {
 
     expect(succeeded, isFalse);
     expect(controller.stage, CameraStage.preview);
-    expect(controller.errorMessage, contains('No internet connection'));
+    expect(
+      controller.errorMessage,
+      contains('Unable to connect to the server'),
+    );
     expect(controller.hasImage, isTrue);
   });
 

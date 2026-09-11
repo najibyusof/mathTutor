@@ -5,13 +5,16 @@ import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/register_page.dart';
 import '../features/camera/presentation/pages/camera_math_screen.dart';
 import '../features/handwriting/presentation/pages/handwriting_page.dart';
-import '../features/history/presentation/pages/history_page.dart';
+import '../features/history/presentation/pages/history_screen.dart';
 import '../features/home/presentation/pages/home_page.dart';
 import '../features/math_input/presentation/pages/math_input_page.dart';
 import '../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../features/profile/presentation/pages/profile_page.dart';
 import '../features/recognition/presentation/pages/recognition_review_screen.dart';
 import '../features/solver/presentation/pages/solver_page.dart';
+import '../features/solver/presentation/pages/solution_screen.dart';
+import '../features/solver/domain/models/solution.dart';
+import '../features/tutor/presentation/pages/tutor_screen.dart';
 import '../features/splash/presentation/pages/splash_page.dart';
 import '../models/question_input_method.dart';
 import 'app_routes.dart';
@@ -19,12 +22,17 @@ import 'route_not_found_page.dart';
 
 /// Arguments accepted by [AppRoutes.solver].
 class SolverArgs {
-  const SolverArgs({required this.expression, this.source = 'keyboard'});
+  const SolverArgs({
+    required this.expression,
+    this.source = 'keyboard',
+    this.solution,
+  });
 
   final String expression;
 
   /// Origin of the expression: `type`, `write` or `scan`.
   final String source;
+  final Solution? solution;
 }
 
 /// Arguments accepted by [AppRoutes.mathInput].
@@ -54,7 +62,7 @@ abstract final class AppRouter {
       AppRoutes.forgotPassword => _page(const ForgotPasswordPage(), settings),
       AppRoutes.handwriting => _page(const HandwritingPage(), settings),
       AppRoutes.camera => _page(const CameraMathScreen(), settings),
-      AppRoutes.history => _page(const HistoryPage(), settings),
+      AppRoutes.history => _page(const HistoryScreen(), settings),
       AppRoutes.profile => _page(const ProfilePage(), settings),
       AppRoutes.mathInput => _page(
         MathInputPage(args: settings.arguments as MathInputArgs?),
@@ -67,7 +75,16 @@ abstract final class AppRouter {
         settings,
       ),
       AppRoutes.solver => _page(
-        SolverPage(args: settings.arguments as SolverArgs?),
+        (settings.arguments is SolverArgs &&
+                (settings.arguments! as SolverArgs).solution != null)
+            ? SolutionScreen(
+                solution: (settings.arguments! as SolverArgs).solution!,
+              )
+            : SolverPage(args: settings.arguments as SolverArgs?),
+        settings,
+      ),
+      AppRoutes.tutor => _page(
+        TutorScreen(solution: (settings.arguments! as SolverArgs).solution!),
         settings,
       ),
       _ => _page(RouteNotFoundPage(routeName: settings.name), settings),
@@ -77,7 +94,10 @@ abstract final class AppRouter {
   static Route<dynamic> onUnknownRoute(RouteSettings settings) =>
       _page(RouteNotFoundPage(routeName: settings.name), settings);
 
-  static MaterialPageRoute<dynamic> _page(Widget child, RouteSettings settings) {
+  static MaterialPageRoute<dynamic> _page(
+    Widget child,
+    RouteSettings settings,
+  ) {
     return MaterialPageRoute<dynamic>(
       builder: (BuildContext context) => child,
       settings: settings,

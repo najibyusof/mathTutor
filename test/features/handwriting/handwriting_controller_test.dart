@@ -25,22 +25,18 @@ class _StubService implements HandwritingRecognitionService {
   }
 }
 
-HandwritingRepository _repository({
-  RecognitionResult? result,
-  Object? error,
-}) => HandwritingRepositoryImpl(
-  _StubService(
-    result: result ?? const RecognitionResult(expression: '2*x=8'),
-    error: error,
-  ),
-);
+HandwritingRepository _repository({RecognitionResult? result, Object? error}) =>
+    HandwritingRepositoryImpl(
+      _StubService(
+        result: result ?? const RecognitionResult(expression: '2*x=8'),
+        error: error,
+      ),
+    );
 
-HandwritingController _controller({
-  RecognitionResult? result,
-  Object? error,
-}) => HandwritingController(
-  repository: _repository(result: result, error: error),
-);
+HandwritingController _controller({RecognitionResult? result, Object? error}) =>
+    HandwritingController(
+      repository: _repository(result: result, error: error),
+    );
 
 void _draw(HandwritingController controller, List<Offset> points) {
   controller.startStroke(points.first);
@@ -177,7 +173,10 @@ void main() {
 
     expect(succeeded, isFalse);
     expect(controller.result, isNull);
-    expect(controller.errorMessage, contains('No internet connection'));
+    expect(
+      controller.errorMessage,
+      contains('Unable to connect to the server'),
+    );
   });
 
   test('recognition is skipped on an empty canvas', () async {

@@ -13,6 +13,7 @@ abstract final class AppRoutes {
   static const String camera = '/camera';
   static const String review = '/review';
   static const String solver = '/solver';
+  static const String tutor = '/tutor';
   static const String history = '/history';
   static const String profile = '/profile';
 }

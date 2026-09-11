@@ -69,12 +69,19 @@ class AuthRepositoryImpl implements AuthRepository {
       await _remote.logout();
       return const Result<void>.success(null);
     } catch (error, stackTrace) {
-      AppLogger.error('Logout request failed', error: error, stackTrace: stackTrace);
+      AppLogger.error(
+        'Logout request failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
       return Result<void>.failure(mapExceptionToFailure(error));
     } finally {
       await _tokenStorage.clear();
     }
   }
+
+  @override
+  Future<void> clearStoredSession() => _tokenStorage.clear();
 
   @override
   Future<Result<AuthUser>> currentUser() async {
@@ -95,7 +102,11 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       return Result<T>.success(await action());
     } catch (error, stackTrace) {
-      AppLogger.error('Auth request failed', error: error, stackTrace: stackTrace);
+      AppLogger.error(
+        'Auth request failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
       return Result<T>.failure(mapExceptionToFailure(error));
     }
   }

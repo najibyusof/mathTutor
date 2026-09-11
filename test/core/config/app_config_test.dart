@@ -24,6 +24,17 @@ void main() {
       }
     });
 
+    test('staging and production point at the deployed backend', () {
+      expect(
+        AppConfig.defaultApiBaseUrls[AppEnvironment.staging],
+        'https://MathTutor.padat.net/api/v1',
+      );
+      expect(
+        AppConfig.defaultApiBaseUrls[AppEnvironment.production],
+        'https://MathTutor.padat.net/api/v1',
+      );
+    });
+
     test('production disables logging', () {
       const AppConfig config = AppConfig(
         environment: AppEnvironment.production,

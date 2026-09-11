@@ -52,6 +52,9 @@ class _FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> clearStoredSession() async => storedToken = false;
+
+  @override
   Future<Result<AuthUser>> currentUser() async => currentUserResult;
 }
 
@@ -61,6 +64,17 @@ void main() {
 
     expect(controller.status, AuthStatus.unknown);
     expect(controller.isAuthenticated, isFalse);
+  });
+
+  test('expired sessions clear the stored credential', () async {
+    final AuthController controller = AuthController(
+      _FakeAuthRepository(storedToken: true),
+    );
+
+    await controller.bootstrap();
+    await controller.handleExpiredSession();
+
+    expect(controller.status, AuthStatus.unauthenticated);
   });
 
   test('bootstrap signs in when a stored token is still valid', () async {
@@ -153,7 +167,10 @@ void main() {
 
     await controller.login(email: 'a@b.c', password: 'secret123');
 
-    expect(controller.errorMessage, contains('No internet connection'));
+    expect(
+      controller.errorMessage,
+      contains('Unable to connect to the server'),
+    );
   });
 
   test('logout clears the session', () async {
@@ -176,7 +193,7 @@ void main() {
     );
     await controller.bootstrap();
 
-    controller.handleExpiredSession();
+    await controller.handleExpiredSession();
 
     expect(controller.status, AuthStatus.unauthenticated);
     expect(controller.errorMessage, contains('session has expired'));

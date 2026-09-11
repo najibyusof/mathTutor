@@ -25,41 +25,44 @@ class EmptyState extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(
-              icon,
-              size: AppSizes.iconXl,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium,
-            ),
-            if (message != null) ...<Widget>[
-              const SizedBox(height: AppSpacing.sm),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: AppSpacing.maxContentWidth),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(
+                icon,
+                size: AppSizes.iconXl,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(height: AppSpacing.lg),
               Text(
-                message!,
+                title,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                style: theme.textTheme.titleMedium,
+              ),
+              if (message != null) ...<Widget>[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  message!,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
+              ],
+              if (actionLabel != null && onAction != null) ...<Widget>[
+                const SizedBox(height: AppSpacing.xl),
+                PrimaryButton(
+                  label: actionLabel!,
+                  isExpanded: false,
+                  onPressed: onAction,
+                ),
+              ],
             ],
-            if (actionLabel != null && onAction != null) ...<Widget>[
-              const SizedBox(height: AppSpacing.xl),
-              PrimaryButton(
-                label: actionLabel!,
-                isExpanded: false,
-                onPressed: onAction,
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );

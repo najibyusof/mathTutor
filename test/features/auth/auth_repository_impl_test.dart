@@ -43,6 +43,23 @@ class _FakeApiClient implements ApiClient {
     }
     return <String, dynamic>{};
   }
+
+  @override
+  Future<Map<String, dynamic>> delete(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    bool authenticated = true,
+  }) => _resolve(path);
+
+  @override
+  Future<Map<String, dynamic>> postMultipart(
+    String path, {
+    required String fieldName,
+    required List<int> bytes,
+    required String filename,
+    Map<String, String>? fields,
+    bool authenticated = true,
+  }) => _resolve(path);
 }
 
 Map<String, dynamic> _sessionJson({String token = 'token-123'}) =>
@@ -57,10 +74,7 @@ Map<String, dynamic> _sessionJson({String token = 'token-123'}) =>
       },
     };
 
-AuthRepository _buildRepository(
-  _FakeApiClient client,
-  TokenStorage storage,
-) {
+AuthRepository _buildRepository(_FakeApiClient client, TokenStorage storage) {
   return AuthRepositoryImpl(
     remote: AuthRemoteDataSource(client),
     tokenStorage: storage,
@@ -219,9 +233,11 @@ void main() {
           responses: <String, Object>{
             ApiEndpoints.user: <String, dynamic>{
               'data': <String, dynamic>{
-                'id': 7,
-                'name': 'Alex Morgan',
-                'email': 'student@mathtutor.app',
+                'user': <String, dynamic>{
+                  'id': 7,
+                  'name': 'Alex Morgan',
+                  'email': 'student@mathtutor.app',
+                },
               },
             },
           },
